@@ -1,8 +1,9 @@
 #include "SocketBase.h"
+using namespace SocketChat;
 
-SocketBase::SocketBase()
+
+SocketBase::SocketBase() :currSocket(NULL)
 {
-	this->strBuff.resize(1024, '\0'); 
 }
 
 SocketBase::~SocketBase()
@@ -16,55 +17,35 @@ int SocketBase::SocketInit()
 	int initWSA = WSAStartup(MAKEWORD(1, 0), &WSStartData);
 	if (initWSA != 0)
 	{
-		std::cout << "Error init: " << WSAGetLastError() << std::endl;
+		throw std::exception("Error initialization of socket lib: ");
 	}
 	return initWSA; 
 }
 
-int SocketBase::SocketSend()
+int SocketBase::SocketStart(int typeConnect)
 {
-	int iSend = send(this->currSocket, this->strBuff.c_str(), this->strBuff.length(), 0); 
-	if (iSend == SOCKET_ERROR)
+	// Server socket 
+	if (typeConnect == 1)
 	{
-		std::cout << "Error sending: " << WSAGetLastError() << std::endl;
+		this->currSocket = socket(AF_INET, SOCK_STREAM, 0);
 	}
-	return iSend; 
+	
+	// Client socket 
+	else if (typeConnect == 2)
+	{
+		this->currSocket = socket(AF_INET, SOCK_STREAM,	IPPROTO_IP);
+	}
+
+	if (this->currSocket == SOCKET_ERROR)
+	{
+		throw std::exception("Error socket creation:");
+	}
+	return this->currSocket;
 }
 
-int SocketBase::SocketSend(SOCKET&currSocket)
+void SocketBase::SocketClose(int paramClose)const 
 {
-	int iSend = send(currSocket, this->strBuff.c_str(), this->strBuff.length(), 0);
-	if (iSend == SOCKET_ERROR)
-	{
-		std::cout << "Error sending: " << WSAGetLastError() << std::endl;
-	}
-	return iSend;
-}
-
-
-int SocketBase::SocketReceive()
-{
-	int iRecv = recv(this->currSocket, &this->strBuff[0], this->strBuff.length(), 0);
-	if (iRecv == SOCKET_ERROR)
-	{
-		std::cout << "Error sending: " << WSAGetLastError() << std::endl;
-	}
-	return iRecv;
-}
-
-int SocketBase::SocketReceive(SOCKET&currSocket)
-{
-	int iRecv = recv(currSocket, &this->strBuff[0], this->strBuff.length(), 0);
-	if (iRecv == SOCKET_ERROR)
-	{
-		std::cout << "Error sending: " << WSAGetLastError() << std::endl;
-	}
-	return iRecv;
-}
-
-void SocketBase::SocketClose(int paramClose)
-{
-	// разрыв соединения как для посылки (1) так и для получения (2) 
+	// breach of connection for sending (1) and receiving (2) 
 	shutdown(this->currSocket, paramClose);
 	closesocket(this->currSocket);
 	WSACleanup();

@@ -1,28 +1,30 @@
 #pragma once
 #include "Settings.h"
 
-class SocketBase
+namespace SocketChat
 {
-protected:
-	WSAData WSStartData; 
-	SOCKET currSocket; 
 
-public:
-	static std::string strBuff;
+	class SocketBase
+	{
+	protected:
+		// Structure for initializing information of main starting socket 
+		WSAData WSStartData;
+		// Pointer to main socket 
+		SOCKET currSocket;
+	public:
+		// buffer for temporary messages 
+		static std::string strBuff;
 
-	SocketBase();
-	virtual ~SocketBase();
+		SocketBase();
+		virtual ~SocketBase();
 
-	int SocketInit(void);
+		// Initialization of main socket's information structure  
+		int SocketInit(void);
 
-	int SocketSend(void);
+		// Creation of socket 
+		int SocketStart(int);
 
-	int SocketSend(SOCKET&);
-
-	int SocketReceive(void);
-
-	int SocketReceive(SOCKET&);
-
-	void SocketClose(int); 
-};
-
+		// Closing of socket 
+		void SocketClose(int)const throw();
+	};
+}

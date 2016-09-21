@@ -1,28 +1,40 @@
 #pragma once
 #include "SocketBase.h"
+#include "GlobalConst.h"
 
-class SocketServer: public SocketBase
+namespace SocketChat
 {
-private: 
-	SOCKET clientSocket; 
-	sockaddr_in ServerSAddr;
-	HANDLE hClientThread;
 
-public:
-	static std::vector<CONNECTED_CLIENT> vecClients;
+	class SocketServer : public SocketBase
+	{
+	private:
+		// pointer tot connected client socket 
+		SOCKET clientSocket;
+		// struct of info of current server  
+		sockaddr_in ServerSAddr;
 
-	SocketServer();
-	~SocketServer();
+		//thread for work with accepted clients socket 
+		friend DWORD WINAPI InThreadWithClients(LPVOID)throw();
+	public:
+		//array with coonnected clients sockets 
+		static std::vector<SOCKET> vecClients;
 
-	void SocketStructInit(void); 
+		SocketServer();
+		~SocketServer();
 
-	int SocketBind(void); 
+		// Initialization of struct with info of current server 
+		void SocketStructInit(void)throw();
 
-	int SocketListen(void) const; 
+		// Binding 
+		int SocketBind(void);
 
-	SOCKET& SocketAccept(sockaddr*, int&); 
+		// Starting of listening 
+		int SocketListen(void) const;
 
-	void CreateThreadinLoopWithClients(void);
-};
+		// Creation of thread for work with accepted clients socket 
+		SOCKET&  SocketAccept(void);
 
-DWORD WINAPI InThreadWithClients(LPVOID);
+	};
+	//thread for work with accepted clients socket 
+	DWORD WINAPI InThreadWithClients(LPVOID)throw();
+}
